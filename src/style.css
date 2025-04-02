@@ -236,8 +236,8 @@ h2 {
 
 .animate-spin {
   animation: spin 1s linear infinite;
-  width: 1.5rem; /* w-6 */
-  height: 1.5rem; /* h-6 */
+  width: 1.5rem; 
+  height: 1.5rem; 
 }
 
 .users-list::-webkit-scrollbar {
@@ -245,8 +245,8 @@ h2 {
 }
 
 .users-list {
-  -ms-overflow-style: none;  /* Hide scrollbar for IE and Edge */
-  scrollbar-width: none;  /* Hide scrollbar for Firefox */
+  -ms-overflow-style: none;  
+  scrollbar-width: none; 
 }
 
 

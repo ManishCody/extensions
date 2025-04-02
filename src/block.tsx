@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ArrowLeft, User, X, Loader2 } from "lucide-react";
 import axios from "axios";
 
@@ -9,17 +9,16 @@ interface BlockedUsersProps {
 
 export default function BlockedUsers({ onNavigateBack, uuid }: BlockedUsersProps) {
   const [username, setUsername] = useState("");
-  const [blockedUsers, setBlockedUsers] = useState<any>([]);
-  const [isBlocking, setIsBlocking] = useState(false);
-  const [message, setMessage] = useState<{ text: string; type: "success" | "error" | "" }>({ text: "", type: "" });
+  const [blockedUsers, setBlockedUsers] = useState<{ username: string; _id: string }[]>([]);
+  const [loading, setLoading] = useState<{ blocking: boolean; unblocking: string | null }>({ blocking: false, unblocking: null });
+  const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   useEffect(() => {
     const fetchBlockedUsers = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/users/blocked-users/${uuid}`);
-        setBlockedUsers(response.data.blockedUsers);
-
-      } catch (error: any) {
+        const { data } = await axios.get(`http://localhost:5000/api/users/blocked-users/${uuid}`);
+        setBlockedUsers(data.blockedUsers);
+      } catch {
         setMessage({ text: "Failed to load blocked users.", type: "error" });
       }
     };
@@ -28,40 +27,42 @@ export default function BlockedUsers({ onNavigateBack, uuid }: BlockedUsersProps
   }, [uuid]);
 
   useEffect(() => {
-    if (message.text) {
-      const timer = setTimeout(() => setMessage({ text: "", type: "" }), 2000);
+    if (message) {
+      const timer = setTimeout(() => setMessage(null), 2000);
       return () => clearTimeout(timer);
     }
   }, [message]);
 
-  const handleBlockUser = async () => {
-    if (!username.trim()) {
-      setMessage({ text: "Please enter a username to block.", type: "error" });
-      return;
-    }
+  const handleBlockUser = useCallback(async () => {
+    if (!username.trim()) return setMessage({ text: "Please enter a username.", type: "error" });
 
-    setIsBlocking(true);
-    setMessage({ text: "", type: "" });
+    setLoading((prev) => ({ ...prev, blocking: true }));
 
     try {
-      const response = await axios.post("http://localhost:5000/api/users/block-user", {
-        uuid,
-        blockUsername: username,
-      });
-
-      setMessage({ text: response.data.message, type: "success" });
-      setBlockedUsers([...blockedUsers, { username, _id: response.data.blockedUserId }]);
+      const { data } = await axios.post("http://localhost:5000/api/users/block-user", { uuid, blockUsername: username });
+      setBlockedUsers((prev) => [...prev, { username, _id: data.blockedUserUUID }]);
+      setMessage({ text: data.message, type: "success" });
       setUsername("");
     } catch (error: any) {
       setMessage({ text: error.response?.data?.error || "Failed to block user.", type: "error" });
     } finally {
-      setIsBlocking(false);
+      setLoading((prev) => ({ ...prev, blocking: false }));
     }
-  };
+  }, [username, uuid]);
 
-  const handleRemoveUser = (userToRemove: string) => {
-    setBlockedUsers(blockedUsers.filter((user: any) => user !== userToRemove));
-  };
+  const handleRemoveUser = useCallback(async (userId: string) => {
+    setLoading((prev) => ({ ...prev, unblocking: userId }));
+
+    try {
+      const { data } = await axios.delete(`http://localhost:5000/api/users/block-user/${uuid}/${userId}`);
+      setBlockedUsers(data.blockedUsers);
+      setMessage({ text: "User unblocked successfully.", type: "success" });
+    } catch (error: any) {
+      setMessage({ text: error.response?.data?.error || "Failed to unblock user.", type: "error" });
+    } finally {
+      setLoading((prev) => ({ ...prev, unblocking: null }));
+    }
+  }, [uuid]);
 
   return (
     <div className="blocked-users-container">
@@ -81,34 +82,28 @@ export default function BlockedUsers({ onNavigateBack, uuid }: BlockedUsersProps
             onChange={(e) => setUsername(e.target.value)}
             className="text-input"
           />
-          <button onClick={handleBlockUser} className="block-button" disabled={isBlocking || !username}>
-            {isBlocking ? <Loader2 className="animate-spin" /> : "Block"}
+          <button onClick={handleBlockUser} className="block-button" disabled={loading.blocking || !username}>
+            {loading.blocking ? <Loader2 className="animate-spin" /> : "Block"}
           </button>
         </div>
 
-        {message.text && (
-          <p className={`message ${message.type === "success" ? "success-message" : "error-message"} `}>
-            {message.text}
-          </p>
-        )}
-
+        {message && <p className={`message ${message.type === "success" ? "success-message" : "error-message"}`}>{message.text}</p>}
 
         <div className="users-list-container">
           <h3 className="list-title">Blocked Users</h3>
           <div className="users-list">
             {blockedUsers.length > 0 ? (
-              blockedUsers.map((user: any) => (
-                <div key={user._id} className="user-item">
+              blockedUsers.map(({ username, _id }) => (
+                <div key={_id} className="user-item">
                   <div className="user-info">
                     <User className="user-icon" />
-                    <span className="user-name">{user.username}</span>
+                    <span className="user-name">{username}</span>
                   </div>
-                  <button onClick={() => handleRemoveUser(user.username)} className="remove-button">
-                    <X className="remove-icon" />
+                  <button onClick={() => handleRemoveUser(_id)} className="remove-button" disabled={loading.unblocking === _id}>
+                    {loading.unblocking === _id ? <Loader2 className="animate-spin" /> : <X className="remove-icon" />}
                   </button>
                 </div>
               ))
-
             ) : (
               <p className="empty-message">No blocked users</p>
             )}
