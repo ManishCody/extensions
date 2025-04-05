@@ -60,3 +60,12 @@ const toggleStatus = ({ statusEnabled }) => {
         });
     });
 };
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === "UPDATE_STATUS") {
+        // Handle status update
+        console.log("Received status:", message.statusEnabled);
+        sendResponse({ received: true }); // Must respond
+        return true; // IMPORTANT: keeps message channel open
+    }
+});

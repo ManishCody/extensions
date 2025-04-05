@@ -21,16 +21,14 @@ export default function FraudDetection({ onNavigateToBlockedUsers }: FraudDetect
     const toggleStatus = () => {
         const newStatus = !statusEnabled;
         setStatusEnabled(newStatus);
-
+    
         chrome.storage.local.set({ statusEnabled: newStatus }, () => {
             chrome.runtime.sendMessage({ action: "UPDATE_STATUS", statusEnabled: newStatus }, () => {
                 console.log("Extension status changed:", newStatus);
             });
         });
     };
-
-
-
+    
     return (
         <div className="fraud-detection-container">
             <div className="logo-section">
@@ -97,7 +95,7 @@ export default function FraudDetection({ onNavigateToBlockedUsers }: FraudDetect
                 <button className="manage-users-button" onClick={onNavigateToBlockedUsers}>
                     <div className="manage-users-label">
                         <User className="user-icon" />
-                        <span>Manage Blocked Users</span>
+                        <span>Blocked Post</span>
                     </div>
                     <ChevronRight className="chevron-icon" />
                 </button>

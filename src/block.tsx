@@ -70,14 +70,14 @@ export default function BlockedUsers({ onNavigateBack, uuid }: BlockedUsersProps
         <button className="back-button" onClick={onNavigateBack}>
           <ArrowLeft className="back-icon" />
         </button>
-        <h1 className="title">Blocked Users</h1>
+        <h1 className="title">Blocked Post</h1>
       </div>
 
       <div className="blocked-users-content">
         <div className="input-group">
           <input
             type="text"
-            placeholder="Enter username to block"
+            placeholder="Enter posts link to block"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="text-input"
@@ -90,7 +90,7 @@ export default function BlockedUsers({ onNavigateBack, uuid }: BlockedUsersProps
         {message && <p className={`message ${message.type === "success" ? "success-message" : "error-message"}`}>{message.text}</p>}
 
         <div className="users-list-container">
-          <h3 className="list-title">Blocked Users</h3>
+          <h3 className="list-title">Blocked Posts</h3>
           <div className="users-list">
             {blockedUsers.length > 0 ? (
               blockedUsers.map(({ username, _id }) => (
