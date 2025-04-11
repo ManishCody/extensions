@@ -20,7 +20,7 @@ export default function BlockedUsers({ onNavigateBack, uuid }: BlockedUsersProps
     const fetchBlockedUsers = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/users/blocked-users/${uuid}?reportType=spam`
+          `http://localhost:5000/api/users/blocked-posts/${uuid}?reportType=spam`
         );
         setBlockedUsers(data.blockedUsers);
       } catch {
