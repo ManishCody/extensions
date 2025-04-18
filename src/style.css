@@ -301,6 +301,57 @@ h2 {
   margin-top: 20px;
 }
 
+.accordion-section {
+  margin-top: 20px;
+}
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  background-color: #3B3361;
+  padding: 10px;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+.accordion-header:hover {
+  background-color: #493f7a;
+}
+
+.accordion-icon {
+  margin-right: 10px;
+}
+
+.accordion-body {
+  margin-top: 10px;
+  background-color: #3B3361;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.button-group-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.action-button {
+  background-color: #e056fd;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.action-button:hover {
+  background-color: #be2edd;
+}
+
+
 .toggle-item {
   display: flex;
   align-items: center;

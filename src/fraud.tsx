@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { Circle, AlertTriangle, User, ChevronRight, EyeOffIcon } from "lucide-react";
+import {
+    Circle,
+    AlertTriangle,
+    EyeOffIcon,
+    Settings2,
+    ChevronDownIcon,
+} from "lucide-react";
 
 interface FraudDetectionProps {
     onNavigateToBlockedUsers: () => void;
@@ -9,6 +15,7 @@ export default function FraudDetection({ onNavigateToBlockedUsers }: FraudDetect
     const [statusEnabled, setStatusEnabled] = useState(true);
     const [hideFakePosts, setHideFakePosts] = useState(true);
     const [hideSuspiciousPosts, setHideSuspiciousPosts] = useState(true);
+    const [showAdvanced, setShowAdvanced] = useState(false); // Advanced accordion toggle
 
     useEffect(() => {
         chrome.storage.local.get(["statusEnabled"], (data) => {
@@ -21,14 +28,11 @@ export default function FraudDetection({ onNavigateToBlockedUsers }: FraudDetect
     const toggleStatus = () => {
         const newStatus = !statusEnabled;
         setStatusEnabled(newStatus);
-    
         chrome.storage.local.set({ statusEnabled: newStatus }, () => {
-            chrome.runtime.sendMessage({ action: "UPDATE_STATUS", statusEnabled: newStatus }, () => {
-                console.log("Extension status changed:", newStatus);
-            });
+            chrome.runtime.sendMessage({ action: "UPDATE_STATUS", statusEnabled: newStatus });
         });
     };
-    
+
     return (
         <div className="fraud-detection-container">
             <div className="logo-section">
@@ -41,6 +45,7 @@ export default function FraudDetection({ onNavigateToBlockedUsers }: FraudDetect
                     />
                 </div>
             </div>
+
             <div className="content-section">
                 <h1 className="title">Dehix fraud detector</h1>
 
@@ -58,7 +63,7 @@ export default function FraudDetection({ onNavigateToBlockedUsers }: FraudDetect
 
                     <div className="toggle-item">
                         <div className="toggle-label">
-                            <EyeOffIcon className="toggle-icon shield-icon" />
+                            <EyeOffIcon className="toggle-icon" />
                             <span>Hide fake posts</span>
                         </div>
                         <label className="switch">
@@ -73,7 +78,7 @@ export default function FraudDetection({ onNavigateToBlockedUsers }: FraudDetect
 
                     <div className="toggle-item">
                         <div className="toggle-label">
-                            <AlertTriangle className="toggle-icon alert-icon" />
+                            <AlertTriangle className="toggle-icon" />
                             <span>Hide suspicious posts</span>
                         </div>
                         <label className="switch">
@@ -86,19 +91,35 @@ export default function FraudDetection({ onNavigateToBlockedUsers }: FraudDetect
                         </label>
                     </div>
                 </div>
-
                 <div className="button-group">
                     <button className="action-button">View activity</button>
                     <button className="action-button">Visit the Dehix</button>
                 </div>
-
-                <button className="manage-users-button" onClick={onNavigateToBlockedUsers}>
-                    <div className="manage-users-label">
-                        <User className="user-icon" />
-                        <span>Blocked Post</span>
+                {/* Advanced Settings Accordion */}
+                <div className="accordion-section">
+                    <div
+                        className="accordion-header"
+                        onClick={() => setShowAdvanced((prev) => !prev)}
+                    >
+                        <div>
+                            <Settings2 className="accordion-icon" />
+                            <span>Advanced Settings</span>
+                        </div>
+                        <ChevronDownIcon className="accordion-icon" />
                     </div>
-                    <ChevronRight className="chevron-icon" />
-                </button>
+                    {showAdvanced && (
+                        <div className="accordion-body">
+                            <div className="button-group">
+                                <button className="action-button" onClick={onNavigateToBlockedUsers}>Block Post</button>
+                                <button className="action-button">Block User</button>
+                            </div>
+                            <div className="button-group">
+                                <button className="action-button">Spam Post</button>
+                                <button className="action-button">Spam User</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
